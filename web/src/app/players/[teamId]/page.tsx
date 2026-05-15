@@ -96,44 +96,44 @@ export default async function PlayerPage({ params }: Props) {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#37003c]">{manager.player_name}</h1>
-          <p className="text-sm text-gray-500">Team ID: {manager.team_id}</p>
+          <p className="text-sm text-gray-500">队伍 ID: {manager.team_id}</p>
         </div>
         <Link href="/" className="border border-gray-300 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:border-[#37003c] hover:text-[#37003c]">
-          Back
+          返回
         </Link>
       </div>
 
       <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard label="Total Points" value={totalPoints.toLocaleString()} />
-        <StatCard label="Avg / GW" value={avgPoints} />
-        <StatCard label="Best GW" value={`GW${bestGW.event}: ${bestGW.points}`} />
-        <StatCard label="Worst GW" value={`GW${worstGW.event}: ${worstGW.points}`} />
-        <StatCard label="Captain Points" value={captainPoints.toLocaleString()} />
-        <StatCard label="Captain Success" value={`${captainSuccess}/${captainPicks.length}`} />
-        <StatCard label="Bench Points" value={benchPoints.toLocaleString()} />
-        <StatCard label="Transfer Cost" value={`-${transferCost}`} />
+        <StatCard label="总得分" value={totalPoints.toLocaleString()} />
+        <StatCard label="场均得分" value={avgPoints} />
+        <StatCard label="最高分轮次" value={`GW${bestGW.event}: ${bestGW.points}`} />
+        <StatCard label="最低分轮次" value={`GW${worstGW.event}: ${worstGW.points}`} />
+        <StatCard label="队长得分" value={captainPoints.toLocaleString()} />
+        <StatCard label="队长成功率" value={`${captainSuccess}/${captainPicks.length}`} />
+        <StatCard label="替补得分" value={benchPoints.toLocaleString()} />
+        <StatCard label="转会扣分" value={`-${transferCost}`} />
       </div>
 
       <div className="mb-8 grid gap-4 md:grid-cols-2">
         <div className="border border-gray-200 p-4">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Points per Gameweek</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">每轮得分</h2>
           <ScoreChart data={scores.map((s) => ({ event: s.event, points: s.points }))} />
         </div>
         <div className="border border-gray-200 p-4">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Overall Rank Trend</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">总排名趋势</h2>
           <RankChart data={scores.map((s) => ({ event: s.event, rank: s.rank }))} />
         </div>
       </div>
 
       <div className="mb-8 border border-gray-200 p-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Top Player Contributions</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">球员贡献排行</h2>
         <PlayerContributionChart data={chartData} />
       </div>
 
       <div className="mb-8 border border-gray-200 p-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Chip Usage</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">卡片使用</h2>
         {chipData.length === 0 ? (
-          <p className="text-sm text-gray-500">No chips used yet.</p>
+          <p className="text-sm text-gray-500">尚未使用卡片</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {chipData.map((c) => (
@@ -152,18 +152,18 @@ export default async function PlayerPage({ params }: Props) {
 
       <div className="mb-8 border border-gray-200 p-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Transfers ({totalTransfers} total, -{transferCost} pts)
+          转会 ({totalTransfers} 次, -{transferCost} 分)
         </h2>
         {transfers.length === 0 ? (
-          <p className="text-sm text-gray-500">No transfers recorded.</p>
+          <p className="text-sm text-gray-500">无转会记录</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b border-gray-200 text-left text-xs text-gray-500">
                 <tr>
-                  <th className="pb-2 pr-4 font-medium">GW</th>
-                  <th className="pb-2 pr-4 font-medium">Out</th>
-                  <th className="pb-2 font-medium">In</th>
+                  <th className="pb-2 pr-4 font-medium">轮次</th>
+                  <th className="pb-2 pr-4 font-medium">转出</th>
+                  <th className="pb-2 font-medium">转入</th>
                 </tr>
               </thead>
               <tbody>
@@ -181,9 +181,9 @@ export default async function PlayerPage({ params }: Props) {
       </div>
 
       <div className="border border-gray-200 p-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Leagues</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">联赛</h2>
         {leagues.length === 0 ? (
-          <p className="text-sm text-gray-500">No leagues found.</p>
+          <p className="text-sm text-gray-500">未找到联赛</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {leagues.map((l) => {

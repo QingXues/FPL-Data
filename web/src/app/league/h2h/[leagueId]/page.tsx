@@ -105,29 +105,29 @@ export default async function H2HLeaguePage({ params }: Props) {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#37003c]">{league.league_name}</h1>
-          <p className="text-sm text-gray-500">Head-to-Head League · {league.team_count} teams</p>
+          <p className="text-sm text-gray-500">Head-to-Head 联赛 · {league.team_count} 支队伍</p>
         </div>
         <Link href="/" className="border border-gray-300 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:border-[#37003c] hover:text-[#37003c]">
-          Back
+          返回
         </Link>
       </div>
 
       <div className="mb-8 border border-gray-200 p-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Standings</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">积分榜</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-gray-200 text-left text-xs text-gray-500">
               <tr>
-                <th className="pb-2 pr-4 font-medium">Rank</th>
-                <th className="pb-2 pr-4 font-medium">Team</th>
-                <th className="pb-2 pr-4 text-right font-medium">P</th>
-                <th className="pb-2 pr-4 text-right font-medium">W</th>
-                <th className="pb-2 pr-4 text-right font-medium">D</th>
-                <th className="pb-2 pr-4 text-right font-medium">L</th>
-                <th className="pb-2 pr-4 text-right font-medium">GF</th>
-                <th className="pb-2 pr-4 text-right font-medium">GA</th>
-                <th className="pb-2 pr-4 text-right font-medium">GD</th>
-                <th className="pb-2 text-right font-medium">Pts</th>
+                <th className="pb-2 pr-4 font-medium">排名</th>
+                <th className="pb-2 pr-4 font-medium">队伍</th>
+                <th className="pb-2 pr-4 text-right font-medium">赛</th>
+                <th className="pb-2 pr-4 text-right font-medium">胜</th>
+                <th className="pb-2 pr-4 text-right font-medium">平</th>
+                <th className="pb-2 pr-4 text-right font-medium">负</th>
+                <th className="pb-2 pr-4 text-right font-medium">进球</th>
+                <th className="pb-2 pr-4 text-right font-medium">失球</th>
+                <th className="pb-2 pr-4 text-right font-medium">净胜</th>
+                <th className="pb-2 text-right font-medium">积分</th>
               </tr>
             </thead>
             <tbody>
@@ -155,7 +155,7 @@ export default async function H2HLeaguePage({ params }: Props) {
       </div>
 
       <div className="mb-8 overflow-x-auto border border-gray-200 p-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Head-to-Head Matrix</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">对阵矩阵</h2>
         <table className="w-full text-sm">
           <thead className="border-b border-gray-200 text-left text-xs text-gray-500">
             <tr>
@@ -197,13 +197,13 @@ export default async function H2HLeaguePage({ params }: Props) {
       </div>
 
       <div className="border border-gray-200 p-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Matches</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">比赛</h2>
         <div className="space-y-4">
           {events.map((ev) => {
             const eventMatches = matches.filter((m) => m.event === ev);
             return (
               <div key={ev}>
-                <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">Gameweek {ev}</h3>
+                <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">第 {ev} 轮</h3>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {eventMatches.map((m, i) => {
                     const isWin1 = m.winner === m.entry_1;

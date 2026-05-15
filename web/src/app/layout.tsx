@@ -3,8 +3,8 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FPL Analytics",
-  description: "Fantasy Premier League data and statistics",
+  title: "FPL 数据平台",
+  description: "Fantasy Premier League 数据分析与统计",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <body className="min-h-screen bg-white text-[#1a1a2e]">
         <header className="border-b border-gray-200 bg-white">
           <div className="mx-auto max-w-6xl px-4 py-4">
@@ -22,7 +22,7 @@ export default function RootLayout({
                 FPL
               </div>
               <span className="text-lg font-bold tracking-tight text-[#37003c]">
-                Analytics
+                数据平台
               </span>
             </Link>
           </div>

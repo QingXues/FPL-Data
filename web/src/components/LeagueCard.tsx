@@ -75,7 +75,7 @@ export default function LeagueCard({ leagueId, leagueName, leagueType }: Props) 
             {leagueType}
           </span>
         </div>
-        <div className="mt-1 text-sm text-gray-500">View stats →</div>
+        <div className="mt-1 text-sm text-gray-500">查看数据 →</div>
       </Link>
     );
   }

@@ -90,23 +90,23 @@ export default async function ClassicLeaguePage({ params }: Props) {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#37003c]">{league.league_name}</h1>
-          <p className="text-sm text-gray-500">Classic League · {league.team_count} teams</p>
+          <p className="text-sm text-gray-500">传统联赛 · {league.team_count} 支队伍</p>
         </div>
         <Link href="/" className="border border-gray-300 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:border-[#37003c] hover:text-[#37003c]">
-          Back
+          返回
         </Link>
       </div>
 
       <div className="mb-8 border border-gray-200 p-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Standings</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">积分榜</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-gray-200 text-left text-xs text-gray-500">
               <tr>
-                <th className="pb-2 pr-4 font-medium">Rank</th>
-                <th className="pb-2 pr-4 font-medium">Team</th>
-                <th className="pb-2 pr-4 text-right font-medium">Total</th>
-                <th className="pb-2 text-right font-medium">Last GW</th>
+                <th className="pb-2 pr-4 font-medium">排名</th>
+                <th className="pb-2 pr-4 font-medium">队伍</th>
+                <th className="pb-2 pr-4 text-right font-medium">总分</th>
+                <th className="pb-2 text-right font-medium">上轮</th>
               </tr>
             </thead>
             <tbody>
@@ -125,26 +125,26 @@ export default async function ClassicLeaguePage({ params }: Props) {
 
       <div className="mb-8 grid gap-4 md:grid-cols-2">
         <div className="border border-gray-200 p-4">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Total Points Trend</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">总得分趋势</h2>
           <MultiLineChart data={totalData} lines={totalLines} />
         </div>
         <div className="border border-gray-200 p-4">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Rank Trend</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">排名趋势</h2>
           <MultiLineChart data={rankData} lines={rankLines} yReversed />
         </div>
       </div>
 
       <div className="border border-gray-200 p-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Gameweek Best / Worst</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">每轮最佳 / 最差</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-gray-200 text-left text-xs text-gray-500">
               <tr>
-                <th className="pb-2 pr-4 font-medium">GW</th>
-                <th className="pb-2 pr-4 font-medium">Best</th>
-                <th className="pb-2 pr-4 text-right font-medium">Pts</th>
-                <th className="pb-2 pr-4 font-medium">Worst</th>
-                <th className="pb-2 text-right font-medium">Pts</th>
+                <th className="pb-2 pr-4 font-medium">轮次</th>
+                <th className="pb-2 pr-4 font-medium">最佳</th>
+                <th className="pb-2 pr-4 text-right font-medium">得分</th>
+                <th className="pb-2 pr-4 font-medium">最差</th>
+                <th className="pb-2 text-right font-medium">得分</th>
               </tr>
             </thead>
             <tbody>

@@ -18,7 +18,7 @@ export default function Home() {
     try {
       const id = parseInt(teamId.trim(), 10);
       if (isNaN(id)) {
-        setError("Please enter a valid Team ID.");
+        setError("请输入有效的队伍 ID");
         setLoading(false);
         return;
       }
@@ -37,14 +37,14 @@ export default function Home() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Failed to collect data.");
+        setError(data.error || "数据采集失败");
         setLoading(false);
         return;
       }
 
       router.push(`/players/${id}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred.");
+      setError(err instanceof Error ? err.message : "发生错误");
       setLoading(false);
     }
   };
@@ -54,24 +54,24 @@ export default function Home() {
       <div className="mx-auto max-w-md">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-[#37003c]">
-            FPL Analytics
+            FPL 数据平台
           </h1>
           <p className="mt-2 text-gray-500">
-            Enter your Fantasy Premier League Team ID to view stats.
+            输入你的 Fantasy Premier League 队伍 ID 查看数据
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="teamId" className="mb-1 block text-sm font-medium text-gray-700">
-              Team ID
+              队伍 ID
             </label>
             <input
               id="teamId"
               type="number"
               value={teamId}
               onChange={(e) => setTeamId(e.target.value)}
-              placeholder="e.g. 12345"
+              placeholder="例如 12345"
               className="w-full border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-[#37003c] focus:ring-1 focus:ring-[#37003c]"
               required
             />
@@ -94,16 +94,16 @@ export default function Home() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                Collecting...
+                采集中...
               </span>
             ) : (
-              "Load Data"
+              "加载数据"
             )}
           </button>
         </form>
 
         <p className="mt-4 text-center text-xs text-gray-400">
-          Your Team ID is in the URL when viewing your team on fantasy.premierleague.com
+          你的队伍 ID 在 fantasy.premierleague.com 查看队伍时的 URL 中
         </p>
       </div>
     </main>

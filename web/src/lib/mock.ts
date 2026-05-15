@@ -38,6 +38,8 @@ const players = [
   { element: 313, name: "Mbeumo" },
   { element: 314, name: "Gordon" },
   { element: 315, name: "Estupinan" },
+  { element: 316, name: "Isak" },
+  { element: 317, name: "B.Fernandes" },
 ];
 
 for (let gw = 1; gw <= 10; gw++) {

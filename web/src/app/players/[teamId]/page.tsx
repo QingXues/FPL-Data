@@ -56,6 +56,14 @@ export default async function PlayerPage({ params }: Props) {
   const totalTransfers = transfers.length;
   const transferCost = scores.reduce((s, g) => s + g.event_transfers_cost, 0);
 
+  const transferElementIds = new Set<number>();
+  for (const t of transfers) {
+    transferElementIds.add(t.element_in);
+    transferElementIds.add(t.element_out);
+  }
+  const transferPlayerNames = await getPlayerNames(Array.from(transferElementIds));
+  const transferNameMap = new Map(transferPlayerNames.map((p) => [p.element, p.web_name]));
+
   const playerMap = new Map<number, { points: number; name: string }>();
   for (const p of picks) {
     if (p.points === null) continue;
@@ -170,8 +178,8 @@ export default async function PlayerPage({ params }: Props) {
                 {transfers.slice(0, 20).map((t, i) => (
                   <tr key={i} className="border-b border-gray-100">
                     <td className="py-2 pr-4">{t.event}</td>
-                    <td className="py-2 pr-4 text-red-600">#{t.element_out}</td>
-                    <td className="py-2 text-green-700">#{t.element_in}</td>
+                    <td className="py-2 pr-4 text-red-600">{transferNameMap.get(t.element_out) || `#${t.element_out}`}</td>
+                    <td className="py-2 text-green-700">{transferNameMap.get(t.element_in) || `#${t.element_in}`}</td>
                   </tr>
                 ))}
               </tbody>

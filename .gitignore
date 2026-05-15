@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Node.js
+node_modules/
+.next/
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/

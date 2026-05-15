@@ -17,7 +17,6 @@ export default async function H2HLeaguePage({ params }: Props) {
 
   const matches = await getH2HMatches(leagueId);
 
-  // Resolve player names
   const teamIdSet = new Set<number>();
   for (const m of matches) {
     teamIdSet.add(m.entry_1);
@@ -33,7 +32,6 @@ export default async function H2HLeaguePage({ params }: Props) {
     teamNames.set(m.team_id, m.player_name);
   }
 
-  // Compute stats per team
   const stats = new Map<
     number,
     { wins: number; draws: number; losses: number; gf: number; ga: number; points: number }
@@ -74,7 +72,6 @@ export default async function H2HLeaguePage({ params }: Props) {
     return (sb.gf - sb.ga) - (sa.gf - sa.ga);
   });
 
-  // Head-to-head matrix
   const h2hMap = new Map<string, { w: number; d: number; l: number; gf: number; ga: number }>();
   for (const m of matches) {
     const key = `${m.entry_1}-${m.entry_2}`;
@@ -101,145 +98,137 @@ export default async function H2HLeaguePage({ params }: Props) {
     }
   }
 
-  // Matches list
   const events = Array.from(new Set(matches.map((m) => m.event))).sort((a, b) => a - b);
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 p-6">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">{league.league_name}</h1>
-            <p className="text-slate-400">Head-to-Head League · {league.team_count} teams</p>
-          </div>
-          <Link href="/" className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors text-sm">
-            Back
-          </Link>
+    <main className="mx-auto max-w-6xl px-4 py-8">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[#37003c]">{league.league_name}</h1>
+          <p className="text-sm text-gray-500">Head-to-Head League · {league.team_count} teams</p>
         </div>
+        <Link href="/" className="border border-gray-300 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:border-[#37003c] hover:text-[#37003c]">
+          Back
+        </Link>
+      </div>
 
-        {/* Standings */}
-        <div className="bg-slate-800 rounded-xl p-4">
-          <h2 className="text-lg font-semibold mb-4">Standings</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-slate-400 border-b border-slate-700">
-                <tr>
-                  <th className="text-left py-2">Rank</th>
-                  <th className="text-left py-2">Team</th>
-                  <th className="text-right py-2">P</th>
-                  <th className="text-right py-2">W</th>
-                  <th className="text-right py-2">D</th>
-                  <th className="text-right py-2">L</th>
-                  <th className="text-right py-2">GF</th>
-                  <th className="text-right py-2">GA</th>
-                  <th className="text-right py-2">GD</th>
-                  <th className="text-right py-2">Pts</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedTeams.map((tid, i) => {
-                  const s = stats.get(tid)!;
-                  const played = s.wins + s.draws + s.losses;
-                  return (
-                    <tr key={tid} className="border-b border-slate-700/50">
-                      <td className="py-2 font-medium">{i + 1}</td>
-                      <td className="py-2">{teamNames.get(tid)}</td>
-                      <td className="py-2 text-right">{played}</td>
-                      <td className="py-2 text-right text-emerald-400">{s.wins}</td>
-                      <td className="py-2 text-right text-slate-400">{s.draws}</td>
-                      <td className="py-2 text-right text-red-400">{s.losses}</td>
-                      <td className="py-2 text-right">{s.gf}</td>
-                      <td className="py-2 text-right">{s.ga}</td>
-                      <td className="py-2 text-right font-bold">{s.gf - s.ga}</td>
-                      <td className="py-2 text-right font-bold">{s.points}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* H2H Matrix */}
-        <div className="bg-slate-800 rounded-xl p-4 overflow-x-auto">
-          <h2 className="text-lg font-semibold mb-4">Head-to-Head Matrix</h2>
+      <div className="mb-8 border border-gray-200 p-4">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Standings</h2>
+        <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-slate-400 border-b border-slate-700">
+            <thead className="border-b border-gray-200 text-left text-xs text-gray-500">
               <tr>
-                <th className="text-left py-2"></th>
-                {sortedTeams.map((tid) => (
-                  <th key={tid} className="text-center py-2 px-2">
-                    {teamNames.get(tid)}
-                  </th>
-                ))}
+                <th className="pb-2 pr-4 font-medium">Rank</th>
+                <th className="pb-2 pr-4 font-medium">Team</th>
+                <th className="pb-2 pr-4 text-right font-medium">P</th>
+                <th className="pb-2 pr-4 text-right font-medium">W</th>
+                <th className="pb-2 pr-4 text-right font-medium">D</th>
+                <th className="pb-2 pr-4 text-right font-medium">L</th>
+                <th className="pb-2 pr-4 text-right font-medium">GF</th>
+                <th className="pb-2 pr-4 text-right font-medium">GA</th>
+                <th className="pb-2 pr-4 text-right font-medium">GD</th>
+                <th className="pb-2 text-right font-medium">Pts</th>
               </tr>
             </thead>
             <tbody>
-              {sortedTeams.map((tidA) => (
-                <tr key={tidA} className="border-b border-slate-700/50">
-                  <td className="py-2 font-medium pr-4">{teamNames.get(tidA)}</td>
-                  {sortedTeams.map((tidB) => {
-                    if (tidA === tidB) {
-                      return <td key={tidB} className="py-2 text-center text-slate-600">-</td>;
-                    }
-                    const rec = h2hMap.get(`${tidA}-${tidB}`);
-                    if (!rec || rec.w + rec.d + rec.l === 0) {
-                      return <td key={tidB} className="py-2 text-center text-slate-600">-</td>;
-                    }
-                    return (
-                      <td key={tidB} className="py-2 text-center">
-                        <div className="text-xs">
-                          <span className="text-emerald-400">{rec.w}</span>
-                          <span className="text-slate-400">/{rec.d}/</span>
-                          <span className="text-red-400">{rec.l}</span>
-                        </div>
-                        <div className="text-xs text-slate-500">
-                          {rec.gf}-{rec.ga}
-                        </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
+              {sortedTeams.map((tid, i) => {
+                const s = stats.get(tid)!;
+                const played = s.wins + s.draws + s.losses;
+                return (
+                  <tr key={tid} className="border-b border-gray-100">
+                    <td className="py-2 pr-4 font-bold text-[#37003c]">{i + 1}</td>
+                    <td className="py-2 pr-4">{teamNames.get(tid)}</td>
+                    <td className="py-2 pr-4 text-right">{played}</td>
+                    <td className="py-2 pr-4 text-right font-semibold text-green-700">{s.wins}</td>
+                    <td className="py-2 pr-4 text-right text-gray-500">{s.draws}</td>
+                    <td className="py-2 pr-4 text-right font-semibold text-red-600">{s.losses}</td>
+                    <td className="py-2 pr-4 text-right">{s.gf}</td>
+                    <td className="py-2 pr-4 text-right">{s.ga}</td>
+                    <td className="py-2 pr-4 text-right font-bold">{s.gf - s.ga}</td>
+                    <td className="py-2 text-right font-bold">{s.points}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
+      </div>
 
-        {/* Matches per GW */}
-        <div className="bg-slate-800 rounded-xl p-4">
-          <h2 className="text-lg font-semibold mb-4">Matches</h2>
-          <div className="space-y-4">
-            {events.map((ev) => {
-              const eventMatches = matches.filter((m) => m.event === ev);
-              return (
-                <div key={ev}>
-                  <h3 className="text-sm font-semibold text-slate-400 mb-2">Gameweek {ev}</h3>
-                  <div className="grid sm:grid-cols-2 gap-2">
-                    {eventMatches.map((m, i) => {
-                      const isWin1 = m.winner === m.entry_1;
-                      const isWin2 = m.winner === m.entry_2;
-                      return (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between bg-slate-700 rounded-lg px-3 py-2"
-                        >
-                          <span className={`text-sm ${isWin1 ? "text-emerald-400 font-bold" : "text-slate-300"}`}>
-                            {teamNames.get(m.entry_1)}
-                          </span>
-                          <span className="text-sm font-mono mx-2">
-                            {m.entry_1_points} - {m.entry_2_points}
-                          </span>
-                          <span className={`text-sm ${isWin2 ? "text-emerald-400 font-bold" : "text-slate-300"}`}>
-                            {teamNames.get(m.entry_2)}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
+      <div className="mb-8 overflow-x-auto border border-gray-200 p-4">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Head-to-Head Matrix</h2>
+        <table className="w-full text-sm">
+          <thead className="border-b border-gray-200 text-left text-xs text-gray-500">
+            <tr>
+              <th className="pb-2 pr-4"></th>
+              {sortedTeams.map((tid) => (
+                <th key={tid} className="pb-2 px-2 text-center text-xs">
+                  {teamNames.get(tid)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {sortedTeams.map((tidA) => (
+              <tr key={tidA} className="border-b border-gray-100">
+                <td className="py-2 pr-4 font-medium text-xs">{teamNames.get(tidA)}</td>
+                {sortedTeams.map((tidB) => {
+                  if (tidA === tidB) {
+                    return <td key={tidB} className="py-2 text-center text-gray-300">—</td>;
+                  }
+                  const rec = h2hMap.get(`${tidA}-${tidB}`);
+                  if (!rec || rec.w + rec.d + rec.l === 0) {
+                    return <td key={tidB} className="py-2 text-center text-gray-300">—</td>;
+                  }
+                  return (
+                    <td key={tidB} className="py-2 text-center text-xs">
+                      <div>
+                        <span className="text-green-700">{rec.w}</span>
+                        <span className="text-gray-400">/{rec.d}/</span>
+                        <span className="text-red-600">{rec.l}</span>
+                      </div>
+                      <div className="text-gray-400">{rec.gf}-{rec.ga}</div>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="border border-gray-200 p-4">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Matches</h2>
+        <div className="space-y-4">
+          {events.map((ev) => {
+            const eventMatches = matches.filter((m) => m.event === ev);
+            return (
+              <div key={ev}>
+                <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">Gameweek {ev}</h3>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {eventMatches.map((m, i) => {
+                    const isWin1 = m.winner === m.entry_1;
+                    const isWin2 = m.winner === m.entry_2;
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between border border-gray-100 px-3 py-2"
+                      >
+                        <span className={`text-sm ${isWin1 ? "font-bold text-[#37003c]" : "text-gray-600"}`}>
+                          {teamNames.get(m.entry_1)}
+                        </span>
+                        <span className="text-sm font-mono font-semibold text-gray-700">
+                          {m.entry_1_points} - {m.entry_2_points}
+                        </span>
+                        <span className={`text-sm ${isWin2 ? "font-bold text-[#37003c]" : "text-gray-600"}`}>
+                          {teamNames.get(m.entry_2)}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </main>

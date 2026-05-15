@@ -49,8 +49,8 @@ export default function LeagueCard({ leagueId, leagueName, leagueType }: Props) 
 
   if (exists === null) {
     return (
-      <div className="bg-slate-700 rounded-lg p-4 animate-pulse">
-        <div className="h-4 bg-slate-600 rounded w-3/4"></div>
+      <div className="border border-gray-200 p-4">
+        <div className="h-4 w-3/4 animate-pulse bg-gray-100"></div>
       </div>
     );
   }
@@ -59,15 +59,15 @@ export default function LeagueCard({ leagueId, leagueName, leagueType }: Props) 
     return (
       <Link
         href={`/league/${leagueType}/${leagueId}`}
-        className="block bg-slate-700 rounded-lg p-4 hover:bg-slate-600 transition-colors"
+        className="block border border-gray-200 p-4 transition-colors hover:border-[#37003c]"
       >
         <div className="flex items-center justify-between">
-          <span className="font-medium">{leagueName}</span>
-          <span className="text-xs px-2 py-1 rounded bg-emerald-900/50 text-emerald-400 uppercase">
+          <span className="font-medium text-[#37003c]">{leagueName}</span>
+          <span className="bg-[#37003c] px-2 py-0.5 text-xs font-semibold text-white uppercase">
             {leagueType}
           </span>
         </div>
-        <div className="text-sm text-slate-400 mt-1">View stats →</div>
+        <div className="mt-1 text-sm text-gray-500">View stats →</div>
       </Link>
     );
   }
@@ -76,15 +76,15 @@ export default function LeagueCard({ leagueId, leagueName, leagueType }: Props) 
     <button
       onClick={handleCollect}
       disabled={loading}
-      className="w-full text-left bg-slate-700 rounded-lg p-4 hover:bg-slate-600 transition-colors disabled:opacity-50"
+      className="w-full border border-gray-200 p-4 text-left transition-colors hover:border-[#37003c] disabled:opacity-50"
     >
       <div className="flex items-center justify-between">
-        <span className="font-medium">{leagueName}</span>
-        <span className="text-xs px-2 py-1 rounded bg-slate-600 text-slate-300 uppercase">
+        <span className="font-medium text-[#37003c]">{leagueName}</span>
+        <span className="border border-gray-300 px-2 py-0.5 text-xs uppercase text-gray-600">
           {leagueType}
         </span>
       </div>
-      <div className="text-sm text-emerald-400 mt-1">
+      <div className="mt-1 text-sm text-green-700">
         {loading ? "Collecting..." : "Click to collect →"}
       </div>
     </button>

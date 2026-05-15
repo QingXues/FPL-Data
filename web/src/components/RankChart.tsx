@@ -13,16 +13,16 @@ import {
 export default function RankChart({ data }: { data: { event: number; rank: number | null }[] }) {
   const reversedData = [...data].reverse();
   return (
-    <div className="h-72 w-full">
+    <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={reversedData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-          <XAxis dataKey="event" stroke="#94a3b8" />
-          <YAxis stroke="#94a3b8" reversed />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <XAxis dataKey="event" stroke="#9ca3af" fontSize={12} />
+          <YAxis stroke="#9ca3af" fontSize={12} reversed />
           <Tooltip
-            contentStyle={{ backgroundColor: "#1e293b", borderColor: "#334155", color: "#f1f5f9" }}
+            contentStyle={{ backgroundColor: "#fff", borderColor: "#e5e7eb", fontSize: 12 }}
           />
-          <Line type="monotone" dataKey="rank" stroke="#f59e0b" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="rank" stroke="#e90052" strokeWidth={2} dot={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>

@@ -10,8 +10,8 @@ interface Props {
 export const dynamic = "force-dynamic";
 
 const COLORS = [
-  "#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6",
-  "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
+  "#37003c", "#e90052", "#00ff85", "#05f0ff", "#ff6b00",
+  "#7c3aed", "#db2777", "#059669", "#2563eb", "#dc2626",
 ];
 
 export default async function ClassicLeaguePage({ params }: Props) {
@@ -23,12 +23,10 @@ export default async function ClassicLeaguePage({ params }: Props) {
 
   const standings = await getClassicStandings(leagueId);
 
-  // Resolve names
   const teamIds = Array.from(new Set(standings.map((s) => s.team_id)));
   const managers = await getManagerNames(teamIds);
   const teamNames = new Map(managers.map((m) => [m.team_id, m.player_name]));
 
-  // Group by team_id
   const teamMap = new Map<number, string>();
   const byEvent = new Map<number, Map<number, { rank: number; team_id: number; total: number; event_total: number }>>();
 
@@ -74,13 +72,11 @@ export default async function ClassicLeaguePage({ params }: Props) {
 
   const rankLines = totalLines;
 
-  // Current standings (last event)
   const lastEvent = events[events.length - 1];
   const currentStandings = lastEvent
     ? Array.from(byEvent.get(lastEvent)!.values()).sort((a, b) => a.rank - b.rank)
     : [];
 
-  // Per-event best/worst
   const eventStats = events.map((ev) => {
     const eventMap = byEvent.get(ev)!;
     const scores = Array.from(eventMap.values());
@@ -90,84 +86,79 @@ export default async function ClassicLeaguePage({ params }: Props) {
   });
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 p-6">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">{league.league_name}</h1>
-            <p className="text-slate-400">Classic League · {league.team_count} teams</p>
-          </div>
-          <Link href="/" className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors text-sm">
-            Back
-          </Link>
+    <main className="mx-auto max-w-6xl px-4 py-8">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[#37003c]">{league.league_name}</h1>
+          <p className="text-sm text-gray-500">Classic League · {league.team_count} teams</p>
         </div>
+        <Link href="/" className="border border-gray-300 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:border-[#37003c] hover:text-[#37003c]">
+          Back
+        </Link>
+      </div>
 
-        {/* Current Standings */}
-        <div className="bg-slate-800 rounded-xl p-4">
-          <h2 className="text-lg font-semibold mb-4">Standings</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-slate-400 border-b border-slate-700">
-                <tr>
-                  <th className="text-left py-2">Rank</th>
-                  <th className="text-left py-2">Team</th>
-                  <th className="text-right py-2">Total</th>
-                  <th className="text-right py-2">Last GW</th>
+      <div className="mb-8 border border-gray-200 p-4">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Standings</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="border-b border-gray-200 text-left text-xs text-gray-500">
+              <tr>
+                <th className="pb-2 pr-4 font-medium">Rank</th>
+                <th className="pb-2 pr-4 font-medium">Team</th>
+                <th className="pb-2 pr-4 text-right font-medium">Total</th>
+                <th className="pb-2 text-right font-medium">Last GW</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentStandings.map((s) => (
+                <tr key={s.team_id} className="border-b border-gray-100">
+                  <td className="py-2 pr-4 font-bold text-[#37003c]">{s.rank}</td>
+                  <td className="py-2 pr-4">{teamNames.get(s.team_id) || `Team ${s.team_id}`}</td>
+                  <td className="py-2 pr-4 text-right font-bold">{s.total}</td>
+                  <td className="py-2 text-right text-gray-500">{s.event_total}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {currentStandings.map((s) => (
-                  <tr key={s.team_id} className="border-b border-slate-700/50">
-                    <td className="py-2 font-medium">{s.rank}</td>
-                    <td className="py-2">{teamNames.get(s.team_id) || `Team ${s.team_id}`}</td>
-                    <td className="py-2 text-right font-bold">{s.total}</td>
-                    <td className="py-2 text-right text-slate-400">{s.event_total}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
+      </div>
 
-        {/* Charts */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-slate-800 rounded-xl p-4">
-            <h2 className="text-lg font-semibold mb-4">Total Points Trend</h2>
-            <MultiLineChart data={totalData} lines={totalLines} />
-          </div>
-          <div className="bg-slate-800 rounded-xl p-4">
-            <h2 className="text-lg font-semibold mb-4">Rank Trend</h2>
-            <MultiLineChart data={rankData} lines={rankLines} yReversed />
-          </div>
+      <div className="mb-8 grid gap-4 md:grid-cols-2">
+        <div className="border border-gray-200 p-4">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Total Points Trend</h2>
+          <MultiLineChart data={totalData} lines={totalLines} />
         </div>
+        <div className="border border-gray-200 p-4">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Rank Trend</h2>
+          <MultiLineChart data={rankData} lines={rankLines} yReversed />
+        </div>
+      </div>
 
-        {/* Per-event best/worst */}
-        <div className="bg-slate-800 rounded-xl p-4">
-          <h2 className="text-lg font-semibold mb-4">Gameweek Best / Worst</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-slate-400 border-b border-slate-700">
-                <tr>
-                  <th className="text-left py-2">GW</th>
-                  <th className="text-left py-2">Best</th>
-                  <th className="text-right py-2">Pts</th>
-                  <th className="text-left py-2">Worst</th>
-                  <th className="text-right py-2">Pts</th>
+      <div className="border border-gray-200 p-4">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Gameweek Best / Worst</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="border-b border-gray-200 text-left text-xs text-gray-500">
+              <tr>
+                <th className="pb-2 pr-4 font-medium">GW</th>
+                <th className="pb-2 pr-4 font-medium">Best</th>
+                <th className="pb-2 pr-4 text-right font-medium">Pts</th>
+                <th className="pb-2 pr-4 font-medium">Worst</th>
+                <th className="pb-2 text-right font-medium">Pts</th>
+              </tr>
+            </thead>
+            <tbody>
+              {eventStats.map((es) => (
+                <tr key={es.event} className="border-b border-gray-100">
+                  <td className="py-2 pr-4">{es.event}</td>
+                  <td className="py-2 pr-4 font-semibold text-green-700">{teamNames.get(es.best.team_id) || `Team ${es.best.team_id}`}</td>
+                  <td className="py-2 pr-4 text-right font-bold">{es.best.event_total}</td>
+                  <td className="py-2 pr-4 font-semibold text-red-600">{teamNames.get(es.worst.team_id) || `Team ${es.worst.team_id}`}</td>
+                  <td className="py-2 text-right font-bold">{es.worst.event_total}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {eventStats.map((es) => (
-                  <tr key={es.event} className="border-b border-slate-700/50">
-                    <td className="py-2">{es.event}</td>
-                    <td className="py-2 text-emerald-400">{teamNames.get(es.best.team_id) || `Team ${es.best.team_id}`}</td>
-                    <td className="py-2 text-right font-bold">{es.best.event_total}</td>
-                    <td className="py-2 text-red-400">{teamNames.get(es.worst.team_id) || `Team ${es.worst.team_id}`}</td>
-                    <td className="py-2 text-right font-bold">{es.worst.event_total}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </main>

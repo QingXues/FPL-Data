@@ -21,16 +21,16 @@ export default function MultiLineChart({
   yReversed?: boolean;
 }) {
   return (
-    <div className="h-80 w-full">
+    <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-          <XAxis dataKey="event" stroke="#94a3b8" />
-          <YAxis stroke="#94a3b8" reversed={yReversed} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <XAxis dataKey="event" stroke="#9ca3af" fontSize={12} />
+          <YAxis stroke="#9ca3af" fontSize={12} reversed={yReversed} />
           <Tooltip
-            contentStyle={{ backgroundColor: "#1e293b", borderColor: "#334155", color: "#f1f5f9" }}
+            contentStyle={{ backgroundColor: "#fff", borderColor: "#e5e7eb", fontSize: 12 }}
           />
-          <Legend />
+          <Legend wrapperStyle={{ fontSize: 12 }} />
           {lines.map((l) => (
             <Line
               key={l.key}

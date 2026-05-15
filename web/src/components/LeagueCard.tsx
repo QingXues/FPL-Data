@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import * as mock from "@/lib/mock";
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
 interface Props {
   leagueId: number;
@@ -17,6 +20,11 @@ export default function LeagueCard({ leagueId, leagueName, leagueType }: Props) 
   const router = useRouter();
 
   useEffect(() => {
+    if (USE_MOCK) {
+      const found = mock.mockLeagues.find((l) => l.league_id === leagueId);
+      setExists(!!found);
+      return;
+    }
     supabase
       .from("leagues")
       .select("league_id")

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { spawnSync } from "child_process";
 import path from "path";
 
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
+
 function runCollector(args: string[]): { success: boolean; stdout: string; stderr: string } {
   const collectorDir = path.join(process.cwd(), "..", "collector");
   const result = spawnSync("python", ["-m", "src.main", ...args], {
@@ -21,6 +23,17 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { teamId, leagueId, leagueType } = body;
+
+    if (USE_MOCK) {
+      // In mock mode, skip real collection and return success immediately
+      if (teamId) {
+        return NextResponse.json({ success: true, type: "manager", teamId });
+      }
+      if (leagueId && leagueType) {
+        return NextResponse.json({ success: true, type: "league", leagueId, leagueType });
+      }
+      return NextResponse.json({ error: "Missing teamId or (leagueId + leagueType)" }, { status: 400 });
+    }
 
     if (teamId) {
       const result = runCollector(["--mode", "collect", "--team-id", String(teamId)]);

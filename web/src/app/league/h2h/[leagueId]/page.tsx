@@ -34,20 +34,20 @@ export default async function H2HLeaguePage({ params }: Props) {
 
   const stats = new Map<
     number,
-    { wins: number; draws: number; losses: number; gf: number; ga: number; points: number }
+    { wins: number; draws: number; losses: number; pf: number; pa: number; points: number }
   >();
 
   for (const tid of teamIds) {
-    stats.set(tid, { wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, points: 0 });
+    stats.set(tid, { wins: 0, draws: 0, losses: 0, pf: 0, pa: 0, points: 0 });
   }
 
   for (const m of matches) {
     const s1 = stats.get(m.entry_1)!;
     const s2 = stats.get(m.entry_2)!;
-    s1.gf += m.entry_1_points;
-    s1.ga += m.entry_2_points;
-    s2.gf += m.entry_2_points;
-    s2.ga += m.entry_1_points;
+    s1.pf += m.entry_1_points;
+    s1.pa += m.entry_2_points;
+    s2.pf += m.entry_2_points;
+    s2.pa += m.entry_1_points;
 
     if (m.winner === m.entry_1) {
       s1.wins += 1;
@@ -69,22 +69,22 @@ export default async function H2HLeaguePage({ params }: Props) {
     const sa = stats.get(a)!;
     const sb = stats.get(b)!;
     if (sb.points !== sa.points) return sb.points - sa.points;
-    return (sb.gf - sb.ga) - (sa.gf - sa.ga);
+    return (sb.pf - sb.pa) - (sa.pf - sa.pa);
   });
 
-  const h2hMap = new Map<string, { w: number; d: number; l: number; gf: number; ga: number }>();
+  const h2hMap = new Map<string, { w: number; d: number; l: number; pf: number; pa: number }>();
   for (const m of matches) {
     const key = `${m.entry_1}-${m.entry_2}`;
     const reverseKey = `${m.entry_2}-${m.entry_1}`;
-    if (!h2hMap.has(key)) h2hMap.set(key, { w: 0, d: 0, l: 0, gf: 0, ga: 0 });
-    if (!h2hMap.has(reverseKey)) h2hMap.set(reverseKey, { w: 0, d: 0, l: 0, gf: 0, ga: 0 });
+    if (!h2hMap.has(key)) h2hMap.set(key, { w: 0, d: 0, l: 0, pf: 0, pa: 0 });
+    if (!h2hMap.has(reverseKey)) h2hMap.set(reverseKey, { w: 0, d: 0, l: 0, pf: 0, pa: 0 });
 
     const rec = h2hMap.get(key)!;
     const rev = h2hMap.get(reverseKey)!;
-    rec.gf += m.entry_1_points;
-    rec.ga += m.entry_2_points;
-    rev.gf += m.entry_2_points;
-    rev.ga += m.entry_1_points;
+    rec.pf += m.entry_1_points;
+    rec.pa += m.entry_2_points;
+    rev.pf += m.entry_2_points;
+    rev.pa += m.entry_1_points;
 
     if (m.winner === m.entry_1) {
       rec.w += 1;
@@ -124,9 +124,8 @@ export default async function H2HLeaguePage({ params }: Props) {
                 <th className="pb-2 pr-4 text-right font-medium">胜</th>
                 <th className="pb-2 pr-4 text-right font-medium">平</th>
                 <th className="pb-2 pr-4 text-right font-medium">负</th>
-                <th className="pb-2 pr-4 text-right font-medium">进球</th>
-                <th className="pb-2 pr-4 text-right font-medium">失球</th>
-                <th className="pb-2 pr-4 text-right font-medium">净胜</th>
+                <th className="pb-2 pr-4 text-right font-medium">得分</th>
+                <th className="pb-2 pr-4 text-right font-medium">对面得分</th>
                 <th className="pb-2 text-right font-medium">积分</th>
               </tr>
             </thead>
@@ -142,9 +141,8 @@ export default async function H2HLeaguePage({ params }: Props) {
                     <td className="py-2 pr-4 text-right font-semibold text-green-700">{s.wins}</td>
                     <td className="py-2 pr-4 text-right text-gray-500">{s.draws}</td>
                     <td className="py-2 pr-4 text-right font-semibold text-red-600">{s.losses}</td>
-                    <td className="py-2 pr-4 text-right">{s.gf}</td>
-                    <td className="py-2 pr-4 text-right">{s.ga}</td>
-                    <td className="py-2 pr-4 text-right font-bold">{s.gf - s.ga}</td>
+                    <td className="py-2 pr-4 text-right">{s.pf}</td>
+                    <td className="py-2 pr-4 text-right">{s.pa}</td>
                     <td className="py-2 text-right font-bold">{s.points}</td>
                   </tr>
                 );
@@ -186,7 +184,7 @@ export default async function H2HLeaguePage({ params }: Props) {
                         <span className="text-gray-400">/{rec.d}/</span>
                         <span className="text-red-600">{rec.l}</span>
                       </div>
-                      <div className="text-gray-400">{rec.gf}-{rec.ga}</div>
+                      <div className="text-gray-400">{rec.pf}-{rec.pa}</div>
                     </td>
                   );
                 })}

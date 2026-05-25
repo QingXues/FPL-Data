@@ -101,8 +101,8 @@ export default function PlayerPage() {
 
       const chartData = Array.from(playerMap.entries())
         .map(([element, item]) => ({ element, ...item }))
+        .filter((item) => item.points > 0)
         .sort((a, b) => b.points - a.points)
-        .slice(0, 15)
         .map((item) => ({ name: item.name, points: item.points }));
 
       if (!cancelled) {

@@ -21,8 +21,8 @@ export default function MultiLineChart({
   yReversed?: boolean;
 }) {
   return (
-    <div className="h-72 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-72 min-h-72 w-full min-w-0">
+      <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis dataKey="event" stroke="#9ca3af" fontSize={12} />

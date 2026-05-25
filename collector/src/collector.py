@@ -229,15 +229,24 @@ class Collector:
         while True:
             data = await self._safe_get(self.api.h2h_league_matches(league_id, page))
             for m in data.get("results", []):
+                entry_1 = m.get("entry_1") or m.get("entry_1_entry")
+                entry_2 = m.get("entry_2") or m.get("entry_2_entry")
+                entry_1_points = m["entry_1_points"]
+                entry_2_points = m["entry_2_points"]
                 winner = m.get("winner")
+                if winner is None:
+                    if entry_1_points > entry_2_points:
+                        winner = entry_1
+                    elif entry_2_points > entry_1_points:
+                        winner = entry_2
                 # winner can be entry_1, entry_2, or null for draw
                 matches.append(H2HMatch(
                     league_id=league_id,
                     event=m["event"],
-                    entry_1=m["entry_1"],
-                    entry_1_points=m["entry_1_points"],
-                    entry_2=m["entry_2"],
-                    entry_2_points=m["entry_2_points"],
+                    entry_1=entry_1,
+                    entry_1_points=entry_1_points,
+                    entry_2=entry_2,
+                    entry_2_points=entry_2_points,
                     winner=winner if winner else None,
                 ))
             if not data.get("has_next"):

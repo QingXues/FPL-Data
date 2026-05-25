@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getManager } from "@/lib/queries";
 
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
+const MOCK_TEAM_ID = 12345;
+
 export default function Home() {
   const [teamId, setTeamId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,6 +41,17 @@ export default function Home() {
 
       if (!res.ok) {
         setError(data.error || "数据采集失败");
+        setLoading(false);
+        return;
+      }
+
+      const collected = await getManager(id);
+      if (!collected) {
+        setError(
+          USE_MOCK
+            ? `当前是示例数据模式，请使用队伍 ID ${MOCK_TEAM_ID}`
+            : "采集已完成，但没有读到队伍数据，请检查队伍 ID 或数据库读取权限"
+        );
         setLoading(false);
         return;
       }

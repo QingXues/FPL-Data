@@ -21,6 +21,9 @@ from .models import (
 )
 
 
+SUPABASE_PAGE_SIZE = 1000
+
+
 class FPLDatabase:
     def __init__(self) -> None:
         url = os.environ["SUPABASE_URL"]
@@ -115,17 +118,29 @@ class FPLDatabase:
 
         events = sorted({event for event, _ in event_player_ids})
         player_ids = sorted({player_id for _, player_id in event_player_ids})
-        resp = (
-            self.client.table("player_history")
-            .select("player_id, round, total_points")
-            .in_("round", events)
-            .in_("player_id", player_ids)
-            .eq("season", season)
-            .execute()
-        )
+        rows: list[dict[str, Any]] = []
+        start = 0
+        while True:
+            end = start + SUPABASE_PAGE_SIZE - 1
+            resp = (
+                self.client.table("player_history")
+                .select("player_id, round, total_points")
+                .in_("round", events)
+                .in_("player_id", player_ids)
+                .eq("season", season)
+                .order("player_id")
+                .order("round")
+                .range(start, end)
+                .execute()
+            )
+            page = resp.data or []
+            rows.extend(page)
+            if len(page) < SUPABASE_PAGE_SIZE:
+                break
+            start += SUPABASE_PAGE_SIZE
 
         points: dict[tuple[int, int], int] = {}
-        for row in resp.data or []:
+        for row in rows:
             key = (row["round"], row["player_id"])
             points[key] = points.get(key, 0) + (row.get("total_points") or 0)
         return points

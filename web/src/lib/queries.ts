@@ -3,6 +3,41 @@ import * as mock from "./mock";
 
 export const SEASON = 26;
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
+const SUPABASE_PAGE_SIZE = 1000;
+
+async function getPlayerHistoryPoints(playerIds: number[], events: number[]) {
+  const rows: { player_id: number; round: number; total_points: number | null }[] = [];
+  let from = 0;
+
+  while (true) {
+    const to = from + SUPABASE_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("player_history")
+      .select("player_id, round, total_points")
+      .in("player_id", playerIds)
+      .in("round", events)
+      .eq("season", SEASON)
+      .order("player_id", { ascending: true })
+      .order("round", { ascending: true })
+      .range(from, to);
+
+    if (error) throw error;
+
+    const page = data || [];
+    rows.push(...page);
+
+    if (page.length < SUPABASE_PAGE_SIZE) break;
+    from += SUPABASE_PAGE_SIZE;
+  }
+
+  const pointsMap = new Map<string, number>();
+  for (const row of rows) {
+    const key = `${row.round}:${row.player_id}`;
+    pointsMap.set(key, (pointsMap.get(key) || 0) + (row.total_points || 0));
+  }
+
+  return pointsMap;
+}
 
 export async function getManager(teamId: number) {
   if (USE_MOCK) return mock.mockManager.team_id === teamId ? mock.mockManager : null;
@@ -45,18 +80,7 @@ export async function getGameweekPicks(teamId: number) {
   const playerIds = Array.from(new Set(picks.map((p) => p.player_id)));
   if (events.length === 0 || playerIds.length === 0) return picks.map((p) => ({ ...p, points: 0 }));
 
-  const { data: history } = await supabase
-    .from("player_history")
-    .select("player_id, round, total_points")
-    .in("player_id", playerIds)
-    .in("round", events)
-    .eq("season", SEASON);
-
-  const pointsMap = new Map<string, number>();
-  for (const row of history || []) {
-    const key = `${row.round}:${row.player_id}`;
-    pointsMap.set(key, (pointsMap.get(key) || 0) + (row.total_points || 0));
-  }
+  const pointsMap = await getPlayerHistoryPoints(playerIds, events);
 
   return picks.map((p) => ({
     ...p,

@@ -1,14 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getManager } from "@/lib/queries";
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
+const MOCK_TEAM_ID = 12345;
+const ACTIVE_TEAM_KEY = "fpl.activeTeamId";
+const ADD_TEAM_KEY = "fpl.addTeam";
+
+interface TeamAccount {
+  teamId: number;
+  playerName: string;
+}
 
 export default function Home() {
   const [teamId, setTeamId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showForm, setShowForm] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const addingTeam = new URLSearchParams(window.location.search).get("addTeam") === "1"
+      || window.localStorage.getItem(ADD_TEAM_KEY) === "true";
+    if (addingTeam) {
+      window.localStorage.removeItem(ADD_TEAM_KEY);
+      setShowForm(true);
+      return;
+    }
+
+    const activeTeamId = window.localStorage.getItem(ACTIVE_TEAM_KEY);
+    if (activeTeamId) {
+      router.replace("/players");
+      return;
+    }
+
+    setShowForm(true);
+  }, [router]);
+
+  const saveTeamAccount = (account: TeamAccount) => {
+    window.localStorage.setItem(ACTIVE_TEAM_KEY, String(account.teamId));
+
+    const rawAccounts = window.localStorage.getItem("fpl.teamAccounts");
+    const accounts = rawAccounts ? JSON.parse(rawAccounts) as TeamAccount[] : [];
+    const nextAccounts = [
+      account,
+      ...accounts.filter((item) => item.teamId !== account.teamId),
+    ];
+    window.localStorage.setItem("fpl.teamAccounts", JSON.stringify(nextAccounts));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +66,8 @@ export default function Home() {
 
       const existing = await getManager(id);
       if (existing) {
-        router.push(`/players/${id}`);
+        saveTeamAccount({ teamId: id, playerName: existing.player_name });
+        router.push("/players");
         return;
       }
 
@@ -42,12 +84,37 @@ export default function Home() {
         return;
       }
 
-      router.push(`/players/${id}`);
+      const collected = await getManager(id);
+      if (!collected) {
+        setError(
+          USE_MOCK
+            ? `当前是示例数据模式，请使用队伍 ID ${MOCK_TEAM_ID}`
+            : "采集已完成，但没有读到队伍数据，请检查队伍 ID 或数据库读取权限"
+        );
+        setLoading(false);
+        return;
+      }
+
+      saveTeamAccount({ teamId: id, playerName: collected.player_name });
+      router.push("/players");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "发生错误");
       setLoading(false);
     }
   };
+
+  if (!showForm) {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-16">
+        <div className="mx-auto max-w-md text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-[#37003c]">
+            FPL 数据平台
+          </h1>
+          <p className="mt-2 text-sm text-gray-500">正在打开已保存的队伍...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-16">
@@ -57,7 +124,7 @@ export default function Home() {
             FPL 数据平台
           </h1>
           <p className="mt-2 text-gray-500">
-            输入你的 Fantasy Premier League 队伍 ID 查看数据
+            添加一个 Fantasy Premier League 队伍
           </p>
         </div>
 

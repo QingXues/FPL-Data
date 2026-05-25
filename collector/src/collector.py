@@ -22,6 +22,12 @@ from .models import (
 
 
 CONCURRENT_REQUESTS = 10
+CHIP_NAME_MAP = {
+    "bboost": "bb",
+    "3xc": "tc",
+    "wildcard": "wc",
+    "freehit": "fh",
+}
 
 
 class Collector:
@@ -68,10 +74,11 @@ class Collector:
             events_collected = max(events_collected, gw["event"])
 
         for chip in history.get("chips", []):
+            chip_name = chip["name"]
             chips.append(Chip(
                 team_id=team_id,
                 event=chip["event"],
-                name=chip["name"],
+                name=CHIP_NAME_MAP.get(chip_name, chip_name),
             ))
 
         # 3. Picks per event
@@ -111,9 +118,16 @@ class Collector:
             ))
 
         # 5. League memberships
+        leagues: list[League] = []
         manager_leagues: list[ManagerLeague] = []
         for league_type in ("classic", "h2h"):
             for league in entry.get("leagues", {}).get(league_type, []):
+                leagues.append(League(
+                    league_id=league["id"],
+                    league_name=league["name"],
+                    league_type=league_type,
+                    team_count=league.get("rank_count") or 0,
+                ))
                 manager_leagues.append(ManagerLeague(
                     team_id=team_id,
                     league_id=league["id"],
@@ -121,6 +135,7 @@ class Collector:
 
         # 6. Write to DB
         self.db.upsert_managers([manager])
+        self.db.upsert_leagues(leagues)
         self.db.upsert_gameweek_scores(scores)
         self.db.upsert_gameweek_picks(picks)
         self.db.delete_transfers(team_id)
@@ -214,15 +229,24 @@ class Collector:
         while True:
             data = await self._safe_get(self.api.h2h_league_matches(league_id, page))
             for m in data.get("results", []):
+                entry_1 = m.get("entry_1") or m.get("entry_1_entry")
+                entry_2 = m.get("entry_2") or m.get("entry_2_entry")
+                entry_1_points = m["entry_1_points"]
+                entry_2_points = m["entry_2_points"]
                 winner = m.get("winner")
+                if winner is None:
+                    if entry_1_points > entry_2_points:
+                        winner = entry_1
+                    elif entry_2_points > entry_1_points:
+                        winner = entry_2
                 # winner can be entry_1, entry_2, or null for draw
                 matches.append(H2HMatch(
                     league_id=league_id,
                     event=m["event"],
-                    entry_1=m["entry_1"],
-                    entry_1_points=m["entry_1_points"],
-                    entry_2=m["entry_2"],
-                    entry_2_points=m["entry_2_points"],
+                    entry_1=entry_1,
+                    entry_1_points=entry_1_points,
+                    entry_2=entry_2,
+                    entry_2_points=entry_2_points,
                     winner=winner if winner else None,
                 ))
             if not data.get("has_next"):
@@ -277,6 +301,12 @@ class Collector:
         leagues = self.db.get_all_leagues()
         for l in leagues:
             print(f"Updating league {l['league_id']} ({l['league_type']})")
-            await self.collect_league(l["league_id"], l["league_type"])
+            try:
+                await self.collect_league(l["league_id"], l["league_type"])
+            except ValueError as e:
+                if ">10" in str(e):
+                    print(f"Skipping league {l['league_id']}: {e}")
+                    continue
+                raise
 
         print("Daily update completed.")

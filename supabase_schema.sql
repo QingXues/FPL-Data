@@ -111,6 +111,7 @@ CREATE TABLE IF NOT EXISTS h2h_matches (
 -- Enable RLS for public read access (optional, adjust as needed)
 ALTER TABLE managers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leagues ENABLE ROW LEVEL SECURITY;
+ALTER TABLE manager_leagues ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gameweek_scores ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gameweek_picks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transfers ENABLE ROW LEVEL SECURITY;
@@ -118,11 +119,119 @@ ALTER TABLE chips ENABLE ROW LEVEL SECURITY;
 ALTER TABLE classic_league_standings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE h2h_matches ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow public read" ON managers FOR SELECT USING (true);
-CREATE POLICY "Allow public read" ON leagues FOR SELECT USING (true);
-CREATE POLICY "Allow public read" ON gameweek_scores FOR SELECT USING (true);
-CREATE POLICY "Allow public read" ON gameweek_picks FOR SELECT USING (true);
-CREATE POLICY "Allow public read" ON transfers FOR SELECT USING (true);
-CREATE POLICY "Allow public read" ON chips FOR SELECT USING (true);
-CREATE POLICY "Allow public read" ON classic_league_standings FOR SELECT USING (true);
-CREATE POLICY "Allow public read" ON h2h_matches FOR SELECT USING (true);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'managers' AND policyname = 'Allow public read'
+    ) THEN
+        CREATE POLICY "Allow public read" ON managers FOR SELECT USING (true);
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'leagues' AND policyname = 'Allow public read'
+    ) THEN
+        CREATE POLICY "Allow public read" ON leagues FOR SELECT USING (true);
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'manager_leagues' AND policyname = 'Allow public read'
+    ) THEN
+        CREATE POLICY "Allow public read" ON manager_leagues FOR SELECT USING (true);
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'gameweek_scores' AND policyname = 'Allow public read'
+    ) THEN
+        CREATE POLICY "Allow public read" ON gameweek_scores FOR SELECT USING (true);
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'gameweek_picks' AND policyname = 'Allow public read'
+    ) THEN
+        CREATE POLICY "Allow public read" ON gameweek_picks FOR SELECT USING (true);
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'transfers' AND policyname = 'Allow public read'
+    ) THEN
+        CREATE POLICY "Allow public read" ON transfers FOR SELECT USING (true);
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'chips' AND policyname = 'Allow public read'
+    ) THEN
+        CREATE POLICY "Allow public read" ON chips FOR SELECT USING (true);
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'classic_league_standings' AND policyname = 'Allow public read'
+    ) THEN
+        CREATE POLICY "Allow public read" ON classic_league_standings FOR SELECT USING (true);
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'h2h_matches' AND policyname = 'Allow public read'
+    ) THEN
+        CREATE POLICY "Allow public read" ON h2h_matches FOR SELECT USING (true);
+    END IF;
+END $$;
+
+-- Relationships for Supabase embedded selects.
+-- CREATE TABLE IF NOT EXISTS does not add constraints to existing tables, so
+-- these blocks are safe to rerun after the initial schema has already been applied.
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'manager_leagues_team_fk'
+    ) THEN
+        ALTER TABLE manager_leagues
+        ADD CONSTRAINT manager_leagues_team_fk
+        FOREIGN KEY (team_id, season) REFERENCES managers(team_id, season)
+        ON DELETE CASCADE;
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'manager_leagues_league_fk'
+    ) THEN
+        ALTER TABLE manager_leagues
+        ADD CONSTRAINT manager_leagues_league_fk
+        FOREIGN KEY (league_id, season) REFERENCES leagues(league_id, season)
+        ON DELETE CASCADE;
+    END IF;
+END $$;

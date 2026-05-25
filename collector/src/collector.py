@@ -16,6 +16,7 @@ from .models import (
     League,
     Manager,
     ManagerLeague,
+    ManagerSummary,
     Transfer,
     manager_from_entry,
 )
@@ -65,6 +66,7 @@ class Collector:
                 points=gw["points"],
                 total_points=gw["total_points"],
                 rank=gw.get("rank"),
+                overall_rank=gw.get("overall_rank"),
                 bank=gw["bank"],
                 value=gw["value"],
                 event_transfers=gw["event_transfers"],
@@ -96,12 +98,11 @@ class Collector:
                 picks.append(GameweekPick(
                     team_id=team_id,
                     event=event,
-                    element=p["element"],
+                    player_id=p["element"],
                     position=p["position"],
                     multiplier=p["multiplier"],
                     is_captain=p.get("is_captain", False),
                     is_vice_captain=p.get("is_vice_captain", False),
-                    points=p.get("points"),
                 ))
 
         # 4. Transfers
@@ -143,9 +144,45 @@ class Collector:
         self.db.delete_chips(team_id)
         self.db.insert_chips(chips)
         self.db.upsert_manager_leagues(manager_leagues)
+        player_points = self.db.get_player_history_points({
+            (pick.event, pick.player_id)
+            for pick in picks
+        })
+        self.db.upsert_manager_summary(self._build_manager_summary(team_id, scores, picks, player_points))
         self.db.update_manager_last_event(team_id, events_collected)
 
         return manager
+
+    def _build_manager_summary(
+        self,
+        team_id: int,
+        scores: list[GameweekScore],
+        picks: list[GameweekPick],
+        player_points: dict[tuple[int, int], int],
+    ) -> ManagerSummary:
+        picks_by_event: dict[int, list[GameweekPick]] = {}
+        for pick in picks:
+            picks_by_event.setdefault(pick.event, []).append(pick)
+
+        captain_points = 0
+        bench_points = 0
+
+        for event_picks in picks_by_event.values():
+            for pick in event_picks:
+                points = player_points.get((pick.event, pick.player_id), 0)
+                if pick.is_captain:
+                    captain_points += points * pick.multiplier
+                if pick.position >= 12:
+                    bench_points += points
+
+        if bench_points == 0:
+            bench_points = sum(score.points_on_bench for score in scores)
+
+        return ManagerSummary(
+            team_id=team_id,
+            captain_points=captain_points,
+            bench_points=bench_points,
+        )
 
     # ------------------------------------------------------------------
     # League collection

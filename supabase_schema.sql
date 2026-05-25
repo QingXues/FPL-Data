@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS gameweek_scores (
     points INT NOT NULL DEFAULT 0,
     total_points INT NOT NULL DEFAULT 0,
     rank INT,
+    overall_rank INT,
     bank INT NOT NULL DEFAULT 0,
     value INT NOT NULL DEFAULT 0,
     event_transfers INT NOT NULL DEFAULT 0,

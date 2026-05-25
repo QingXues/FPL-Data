@@ -36,6 +36,9 @@ class FPLClient:
     async def entry_event_picks(self, team_id: int, event: int) -> dict[str, Any]:
         return await self._get(f"entry/{team_id}/event/{event}/picks/")
 
+    async def event_live(self, event: int) -> dict[str, Any]:
+        return await self._get(f"event/{event}/live/")
+
     async def entry_transfers(self, team_id: int) -> list[dict[str, Any]]:
         return await self._get(f"entry/{team_id}/transfers/")
 

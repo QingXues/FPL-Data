@@ -16,6 +16,7 @@ from .models import (
     League,
     Manager,
     ManagerLeague,
+    ManagerSummary,
     Transfer,
 )
 
@@ -50,6 +51,12 @@ class FPLDatabase:
         self.client.table("managers").update({
             "last_event_collected": last_event,
         }).eq("team_id", team_id).eq("season", season).execute()
+
+    def upsert_manager_summary(self, summary: ManagerSummary) -> None:
+        self.client.table("manager_summaries").upsert(
+            summary.model_dump(),
+            on_conflict="team_id,season",
+        ).execute()
 
     # ------------------------------------------------------------------
     # Leagues
@@ -96,7 +103,32 @@ class FPLDatabase:
         if not picks:
             return
         data = [p.model_dump() for p in picks]
-        self.client.table("gameweek_picks").upsert(data, on_conflict="team_id,event,element,season").execute()
+        self.client.table("gameweek_picks").upsert(data, on_conflict="team_id,event,player_id,season").execute()
+
+    def get_player_history_points(
+        self,
+        event_player_ids: set[tuple[int, int]],
+        season: int = 26,
+    ) -> dict[tuple[int, int], int]:
+        if not event_player_ids:
+            return {}
+
+        events = sorted({event for event, _ in event_player_ids})
+        player_ids = sorted({player_id for _, player_id in event_player_ids})
+        resp = (
+            self.client.table("player_history")
+            .select("player_id, round, total_points")
+            .in_("round", events)
+            .in_("player_id", player_ids)
+            .eq("season", season)
+            .execute()
+        )
+
+        points: dict[tuple[int, int], int] = {}
+        for row in resp.data or []:
+            key = (row["round"], row["player_id"])
+            points[key] = points.get(key, 0) + (row.get("total_points") or 0)
+        return points
 
     # ------------------------------------------------------------------
     # Transfers

@@ -36,6 +36,7 @@ class GameweekScore(BaseModel):
     points: int
     total_points: int
     rank: int | None = None
+    overall_rank: int | None = None
     bank: int
     value: int
     event_transfers: int
@@ -47,12 +48,18 @@ class GameweekScore(BaseModel):
 class GameweekPick(BaseModel):
     team_id: int
     event: int
-    element: int
+    player_id: int
     position: int
     multiplier: int
     is_captain: bool
     is_vice_captain: bool
-    points: int | None = None
+    season: int = Field(default=SEASON)
+
+
+class ManagerSummary(BaseModel):
+    team_id: int
+    captain_points: int = Field(default=0)
+    bench_points: int = Field(default=0)
     season: int = Field(default=SEASON)
 
 

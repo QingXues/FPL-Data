@@ -6,6 +6,7 @@ import {
   getManager,
   getGameweekScores,
   getGameweekPicks,
+  getManagerSummary,
   getTransfers,
   getChips,
   getManagerLeagues,
@@ -22,6 +23,7 @@ const ADD_TEAM_KEY = "fpl.addTeam";
 type Manager = Awaited<ReturnType<typeof getManager>>;
 type GameweekScore = Awaited<ReturnType<typeof getGameweekScores>>[number];
 type GameweekPick = Awaited<ReturnType<typeof getGameweekPicks>>[number];
+type ManagerSummary = Awaited<ReturnType<typeof getManagerSummary>>;
 type Transfer = Awaited<ReturnType<typeof getTransfers>>[number];
 type Chip = Awaited<ReturnType<typeof getChips>>[number];
 type ManagerLeague = Awaited<ReturnType<typeof getManagerLeagues>>[number];
@@ -30,6 +32,7 @@ interface PlayerData {
   manager: NonNullable<Manager>;
   scores: GameweekScore[];
   picks: GameweekPick[];
+  summary: ManagerSummary;
   transfers: Transfer[];
   chips: Chip[];
   leagues: ManagerLeague[];
@@ -60,9 +63,10 @@ export default function PlayerPage() {
         return;
       }
 
-      const [scores, picks, transfers, chips, leagues] = await Promise.all([
+      const [scores, picks, summary, transfers, chips, leagues] = await Promise.all([
         getGameweekScores(teamId),
         getGameweekPicks(teamId),
+        getManagerSummary(teamId),
         getTransfers(teamId),
         getChips(teamId),
         getManagerLeagues(teamId),
@@ -80,11 +84,11 @@ export default function PlayerPage() {
       for (const p of picks) {
         if (p.points === null) continue;
         const contrib = p.points * p.multiplier;
-        const existing = playerMap.get(p.element);
+        const existing = playerMap.get(p.player_id);
         if (existing) {
           existing.points += contrib;
         } else {
-          playerMap.set(p.element, { points: contrib, name: `Player #${p.element}` });
+          playerMap.set(p.player_id, { points: contrib, name: `Player #${p.player_id}` });
         }
       }
 
@@ -102,7 +106,7 @@ export default function PlayerPage() {
         .map((item) => ({ name: item.name, points: item.points }));
 
       if (!cancelled) {
-        setData({ manager, scores, picks, transfers, chips, leagues, transferNameMap, chartData });
+        setData({ manager, scores, picks, summary, transfers, chips, leagues, transferNameMap, chartData });
       }
     }
 
@@ -140,7 +144,7 @@ export default function PlayerPage() {
     );
   }
 
-  const { manager, scores, picks, transfers, chips, leagues, transferNameMap, chartData } = data;
+  const { manager, scores, picks, summary, transfers, chips, leagues, transferNameMap, chartData } = data;
   const totalPoints = scores.length > 0 ? scores[scores.length - 1].total_points : 0;
   const avgPoints = scores.length > 0
     ? (scores.reduce((s, g) => s + g.points, 0) / scores.length).toFixed(1)
@@ -149,17 +153,12 @@ export default function PlayerPage() {
   const worstGW = scores.reduce((worst, g) => (g.points < worst.points ? g : worst), scores[0] || { event: 0, points: 0 });
 
   const captainPicks = picks.filter((p) => p.is_captain && p.points !== null);
-  const captainPoints = captainPicks.reduce((s, p) => s + (p.points || 0) * p.multiplier, 0);
-  const captainSuccess = scores.length > 0
-    ? captainPicks.filter((cp) => {
-        const gwPicks = picks.filter((p) => p.event === cp.event && p.points !== null);
-        const maxPts = Math.max(...gwPicks.map((p) => p.points || 0));
-        return (cp.points || 0) >= maxPts;
-      }).length
-    : 0;
+  const computedCaptainPoints = captainPicks.reduce((s, p) => s + (p.points || 0) * p.multiplier, 0);
 
   const benchPicks = picks.filter((p) => p.position >= 12 && p.points !== null);
-  const benchPoints = benchPicks.reduce((s, p) => s + (p.points || 0), 0);
+  const computedBenchPoints = benchPicks.reduce((s, p) => s + (p.points || 0), 0);
+  const captainPoints = summary?.captain_points ?? computedCaptainPoints;
+  const benchPoints = summary?.bench_points ?? computedBenchPoints;
   const totalTransfers = transfers.length;
   const transferCost = scores.reduce((s, g) => s + g.event_transfers_cost, 0);
   const chipData = chips.map((c) => {
@@ -192,7 +191,6 @@ export default function PlayerPage() {
         <StatCard label="最高分轮次" value={`GW${bestGW.event}: ${bestGW.points}`} />
         <StatCard label="最低分轮次" value={`GW${worstGW.event}: ${worstGW.points}`} />
         <StatCard label="队长得分" value={captainPoints.toLocaleString()} />
-        <StatCard label="队长成功率" value={`${captainSuccess}/${captainPicks.length}`} />
         <StatCard label="替补得分" value={benchPoints.toLocaleString()} />
         <StatCard label="转会扣分" value={`-${transferCost}`} />
       </div>
@@ -204,7 +202,7 @@ export default function PlayerPage() {
         </div>
         <div className="border border-gray-200 p-4">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">总排名趋势</h2>
-          <RankChart data={scores.map((s) => ({ event: s.event, rank: s.rank }))} />
+          <RankChart data={scores.map((s) => ({ event: s.event, rank: s.overall_rank ?? null }))} />
         </div>
       </div>
 
